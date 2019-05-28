@@ -55,16 +55,36 @@ function bulk(index, type, data) {
   return client.bulk({body});
 }
 
-function search(index, term, value) {
-  return client.search({
-    index,
-    body: {
-      "query": {
-        "match" : {
-          [term] : value
-        }
+function searchOneTerm(index, term, value) {
+  const query = {
+    "query": {
+      "match" : {
+        [term] : value
       }
     }
+  };
+
+  return client.search({
+    index,
+    body: query,
+    pretty: true
+  });
+}
+
+function searchMultipleTerms(index, terms, value) {
+  const shouldQuery = terms.map(t => ({terms: {[t]: value}}))
+  const query = {
+    "query": {
+      "bool": {
+        "should": shouldQuery
+      }
+    }
+  };
+
+  return client.search({
+    index,
+    body: query,
+    pretty: true
   });
 }
 
@@ -74,6 +94,7 @@ module.exports = {
   createIndex,
   deleteIndex,
   recreateIndex,
-  search,
+  searchOneTerm,
+  searchMultipleTerms,
   bulk
 };

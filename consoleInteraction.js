@@ -1,6 +1,5 @@
 const prompts = require('prompts');
 const elasticsearch = require('./elasticsearch');
-const searchData = require('./elasticsearch/searchData');
 
 const begin = () => {
   welcome();
@@ -74,7 +73,7 @@ const enterSearchValue = async(source, term) => {
   const results = await elasticsearch.getSearch(source, term, value);
 
   if (results.length > 0) {
-    console.log(results);
+    console.log(JSON.stringify(results, null, 2));
   } else {
     console.log('No results found');
   }
@@ -96,8 +95,6 @@ const viewSearchableFields = async() => {
 const choiceInput = async(choices, message) => {
   const menu = choices.map(c => ({ title: c }));
   menu.push({title: 'quit'});
-
-  console.log(menu);
 
   const { choice } = await prompts({
     type: 'autocomplete',

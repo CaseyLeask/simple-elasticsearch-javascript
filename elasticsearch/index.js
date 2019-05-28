@@ -3,7 +3,8 @@ const {
   indices,
   bulk,
   recreateIndex,
-  search
+  searchOneTerm,
+  searchMultipleTerms
 } = require('./client');
 const searchData = require('./searchData');
 
@@ -47,9 +48,29 @@ const getSearch = async(source, term, value) => {
     return []; // This cannot return a value, but program needs to accept empty values
   }
 
-  const { hits: { hits }} = await search(source, term, value);
+  const { hits: { hits }} = await searchOneTerm(source, term, value);
 
-  const flattenedResults = hits.map(hit => hit['_source']);
+  const flattenedResults = hits.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+
+  if (source == 'users') {
+    const userIds = flattenedResults.map(u => u['_id']);
+    const relatedTicketFields = ['submitter_id', 'assignee_id'];
+    const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', relatedTicketFields, userIds);
+
+    const flattenedTickets = tickets.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+
+    flattenedResults.forEach(user => {
+      const relatedTickets = flattenedTickets.filter(ticket => {
+        return relatedTicketFields.some(field => ticket[field] == user['_id']);
+      });
+      user.relatedTickets = relatedTickets;
+    });
+  }
+
+  if (source == 'organizations') {
+    // Get tickets?
+  }
+
   return flattenedResults;
 };
 
