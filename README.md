@@ -25,3 +25,19 @@ yarn
 ```
 yarn start
 ```
+
+# Troubleshooting
+Install Kibana and have a poke around.
+```
+brew install kibana
+brew services start kibana
+```
+
+Log files for elasticsearch can found with
+```
+brew info elasticsearch
+```
+
+# General notes
+We're dropping the indexes and re-creating them every time the application starts.
+That's fine for local development, but it's not a thing you should be doing in production.
