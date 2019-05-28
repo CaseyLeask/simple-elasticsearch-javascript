@@ -2,14 +2,17 @@ const elasticsearch = require('elasticsearch');
 
 const client = new elasticsearch.Client({
   host: '127.0.0.1:9200',
-  log: 'error'
+  log: 'error',
+  maxRetries: 3,
+  requestTimeout: 5000
 });
 
 function ping() {
-  return client.ping({
-    // ping usually has a 3000ms timeout
-    requestTimeout: 1000
-  });
+  return client.ping();
+}
+
+function indices(indices) {
+  return client.indices.get({index: indices});
 }
 
 function createIndex(index) {
@@ -52,10 +55,25 @@ function bulk(index, type, data) {
   return client.bulk({body});
 }
 
+function search(index, term, value) {
+  return client.search({
+    index,
+    body: {
+      "query": {
+        "match" : {
+          [term] : value
+        }
+      }
+    }
+  });
+}
+
 module.exports = {
   ping,
+  indices,
   createIndex,
   deleteIndex,
   recreateIndex,
+  search,
   bulk
 };

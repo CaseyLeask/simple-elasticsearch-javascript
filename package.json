@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/CaseyLeask/simple-elasticsearch-javascript#readme",
   "dependencies": {
-    "elasticsearch": "^16.0.0"
+    "elasticsearch": "^16.0.0",
+    "prompts": "^2.1.0"
   }
 }
