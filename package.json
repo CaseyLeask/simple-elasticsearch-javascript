@@ -1,0 +1,23 @@
+{
+  "name": "simple-elasticsearch-javascript",
+  "version": "1.0.0",
+  "description": "A simple elasticsearch javascript project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CaseyLeask/simple-elasticsearch-javascript.git"
+  },
+  "author": "Casey Leask",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CaseyLeask/simple-elasticsearch-javascript/issues"
+  },
+  "homepage": "https://github.com/CaseyLeask/simple-elasticsearch-javascript#readme",
+  "dependencies": {
+    "elasticsearch": "^16.0.0"
+  }
+}
