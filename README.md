@@ -38,6 +38,8 @@ Log files for elasticsearch can found with
 brew info elasticsearch
 ```
 
-# General notes
+# Shortcomings
 We're dropping the indexes and re-creating them every time the application starts.
 That's fine for local development, but it's not a thing you should be doing in production.
+This code is real messy, and lacks a proper test suite. This code was done in the style of a 'spike', a polite way of saying 'hack day code, not for long term maintenance'.
+In the process of implementing every feature in the requirements, I realised that the solution is a combination of ORM and Search.
