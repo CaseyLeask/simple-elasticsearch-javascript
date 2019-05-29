@@ -38,6 +38,13 @@ Log files for elasticsearch can found with
 brew info elasticsearch
 ```
 
+# Nice extras
+Since I didn't have a 'schema', but only what's in the provided files, I decided to make *that* the schema in all cases.
+What this means is that if you want to add or remove fields from any of the data files, you can do so, re-run the application and everything will most likely be fine.
+I'm exploiting elasticsearch dynamic mappings to do this while still giving fast results to queries.
+The exception to this is the relations between the data-sets, since there isn't a way to programmatically link, for example `ticket.submitter_id` to `users`, without establishing that link somewhere.
+Since the fields can be dynamic, but known when beginning console interaction, I made the 'Enter Search Term' list be an auto-suggest of available fields, updated on the fly based on user input.
+
 # Shortcomings
 We're dropping the indexes and re-creating them every time the application starts.
 That's fine for local development, but it's not a thing you should be doing in production.
