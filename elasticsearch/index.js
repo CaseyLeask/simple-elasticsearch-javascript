@@ -52,7 +52,62 @@ const getSearch = async(source, term, value) => {
 
   const flattenedResults = hits.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
 
-  if (source == 'users') {
+  if (source == 'organizations') {
+    const organizationIds = flattenedResults.map(u => u['_id']);
+    const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', ['organization_id'], organizationIds);
+
+    const flattenedTickets = tickets.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+
+    flattenedResults.forEach(organization => {
+      const relatedTickets = flattenedTickets.filter(ticket => {
+        return ticket['organization_id'] == organization['_id'];
+      });
+      organization.relatedTickets = relatedTickets;
+    });
+
+    const { hits: { hits: users }} = await searchMultipleTerms('users', ['organization_id'], organizationIds);
+
+    const flattenedUsers = users.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+
+    flattenedResults.forEach(organization => {
+      const relatedUsers = flattenedUsers.filter(user => {
+        return user['organization_id'] == organization['_id'];
+      });
+      organization.relatedUsers = relatedUsers;
+    });
+  } else if (source == 'tickets') {
+    const organizationIds = flattenedResults.map(t => t['organization_id'])
+                                            .filter(t => t != null);
+
+    const { hits: { hits: organizations }} = await searchMultipleTerms('organizations', ['_id'], organizationIds);
+
+    const flattenedOrganizations = organizations.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+    flattenedResults.forEach(ticket => {
+      const relatedOrganization = flattenedOrganizations.filter(organization => {
+        return organization['_id'] == ticket['organization_id'];
+      })[0];
+      ticket.organization = relatedOrganization;
+    });
+
+    const submitterIds = flattenedResults.map(t => t['submitter_id']);
+    const assigneeIds = flattenedResults.map(t => t['assignee_id'])
+                                        .filter(t => t != null);
+    const userIds = submitterIds.concat(assigneeIds);
+    const { hits: { hits: users }} = await searchMultipleTerms('users', ['_id'], userIds);
+
+    const flattenedUsers = users.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+    flattenedResults.forEach(ticket => {
+      const relatedSubmitterUser = flattenedUsers.filter(user => {
+        return user['_id'] == ticket['submitter_id'];
+      })[0];
+      ticket.submitterUser = relatedSubmitterUser;
+
+      const relatedAssigneeUser = flattenedUsers.filter(user => {
+        return user['_id'] == ticket['assignee_id'];
+      })[0];
+      ticket.assigneeUser = relatedAssigneeUser;
+    });
+  } else if (source == 'users') {
     const userIds = flattenedResults.map(u => u['_id']);
     const relatedTicketFields = ['submitter_id', 'assignee_id'];
     const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', relatedTicketFields, userIds);
@@ -65,10 +120,6 @@ const getSearch = async(source, term, value) => {
       });
       user.relatedTickets = relatedTickets;
     });
-  }
-
-  if (source == 'organizations') {
-    // Get tickets?
   }
 
   return flattenedResults;
