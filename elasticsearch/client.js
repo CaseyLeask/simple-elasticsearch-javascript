@@ -72,7 +72,7 @@ function searchOneTerm(index, term, value) {
 }
 
 function searchMultipleTerms(index, terms, value) {
-  const shouldQuery = terms.map(t => ({terms: {[t]: value}}))
+  const shouldQuery = terms.map(t => ({terms: {[t]: value}}));
   const query = {
     "query": {
       "bool": {

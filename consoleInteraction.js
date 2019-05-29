@@ -1,5 +1,5 @@
-const prompts = require('prompts');
 const elasticsearch = require('./elasticsearch');
+const { textInput, choiceInput } = require('./prompts');
 
 const begin = () => {
   welcome();
@@ -27,7 +27,7 @@ const viewOrSearch = async() => {
       chooseSource();
       break;
     case '2':
-      viewSearchableFields();
+      printSearchableFields();
       break;
     default:
       console.log(`Unrecognised command: '${choice}'`);
@@ -55,7 +55,6 @@ const chooseSource = async() => {
       await chooseSource();
   }
 
-  console.log(source);
   enterSearchTerm(source);
 };
 
@@ -79,7 +78,7 @@ const enterSearchValue = async(source, term) => {
   }
 };
 
-const viewSearchableFields = async() => {
+const printSearchableFields = async() => {
   const sources = await elasticsearch.getSearchableFields();
 
   Object.keys(sources).forEach(source => {
@@ -90,39 +89,6 @@ const viewSearchableFields = async() => {
     sources[source].forEach(field => console.log(field));
     console.log('');
   })
-};
-
-const choiceInput = async(choices, message) => {
-  const menu = choices.map(c => ({ title: c }));
-  menu.push({title: 'quit'});
-
-  const { choice } = await prompts({
-    type: 'autocomplete',
-    name: 'choice',
-    message: message,
-    choices: menu,
-    limit: 30
-  });
-
-  if (choice == 'quit') {
-    process.exit();
-  }
-
-  return choice;
-};
-
-const textInput = async(message = '') => {
-  const { choice } = await prompts({
-    type: 'text',
-    name: 'choice',
-    message: message
-  });
-
-  if (choice == 'quit') {
-    process.exit();
-  }
-
-  return choice;
 };
 
 module.exports = {

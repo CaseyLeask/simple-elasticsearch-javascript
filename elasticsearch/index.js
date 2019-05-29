@@ -36,94 +36,106 @@ const getSearchableFields = async(sources = searchData.sources) => {
   const flattenedData = {};
 
   sources.forEach(s => {
-    flattenedData[s] = ['_id'];
-    flattenedData[s] = flattenedData[s].concat(Object.keys(indicesData[s]['mappings'][s]['properties']));
+    flattenedData[s] = Object.keys(indicesData[s]['mappings'][s]['properties']);
   });
 
   return flattenedData;
 };
 
 const getSearch = async(source, term, value) => {
-  if (term == '_id' && value == '') {
-    return []; // This cannot return a value, but program needs to accept empty values
-  }
-
   const { hits: { hits }} = await searchOneTerm(source, term, value);
-
-  const flattenedResults = hits.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
+  const results = hits.map(hit => hit['_source']);
 
   if (source == 'organizations') {
-    const organizationIds = flattenedResults.map(u => u['_id']);
-    const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', ['organization_id'], organizationIds);
-
-    const flattenedTickets = tickets.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
-
-    flattenedResults.forEach(organization => {
-      const relatedTickets = flattenedTickets.filter(ticket => {
-        return ticket['organization_id'] == organization['_id'];
-      });
-      organization.relatedTickets = relatedTickets;
-    });
-
-    const { hits: { hits: users }} = await searchMultipleTerms('users', ['organization_id'], organizationIds);
-
-    const flattenedUsers = users.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
-
-    flattenedResults.forEach(organization => {
-      const relatedUsers = flattenedUsers.filter(user => {
-        return user['organization_id'] == organization['_id'];
-      });
-      organization.relatedUsers = relatedUsers;
-    });
+    return enrichOrganizationsSearch(results);
   } else if (source == 'tickets') {
-    const organizationIds = flattenedResults.map(t => t['organization_id'])
-                                            .filter(t => t != null);
-
-    const { hits: { hits: organizations }} = await searchMultipleTerms('organizations', ['_id'], organizationIds);
-
-    const flattenedOrganizations = organizations.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
-    flattenedResults.forEach(ticket => {
-      const relatedOrganization = flattenedOrganizations.filter(organization => {
-        return organization['_id'] == ticket['organization_id'];
-      })[0];
-      ticket.organization = relatedOrganization;
-    });
-
-    const submitterIds = flattenedResults.map(t => t['submitter_id']);
-    const assigneeIds = flattenedResults.map(t => t['assignee_id'])
-                                        .filter(t => t != null);
-    const userIds = submitterIds.concat(assigneeIds);
-    const { hits: { hits: users }} = await searchMultipleTerms('users', ['_id'], userIds);
-
-    const flattenedUsers = users.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
-    flattenedResults.forEach(ticket => {
-      const relatedSubmitterUser = flattenedUsers.filter(user => {
-        return user['_id'] == ticket['submitter_id'];
-      })[0];
-      ticket.submitterUser = relatedSubmitterUser;
-
-      const relatedAssigneeUser = flattenedUsers.filter(user => {
-        return user['_id'] == ticket['assignee_id'];
-      })[0];
-      ticket.assigneeUser = relatedAssigneeUser;
-    });
+    return enrichTicketsSearch(results);
   } else if (source == 'users') {
-    const userIds = flattenedResults.map(u => u['_id']);
-    const relatedTicketFields = ['submitter_id', 'assignee_id'];
-    const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', relatedTicketFields, userIds);
-
-    const flattenedTickets = tickets.map(hit => Object.assign(hit['_source'], {'_id': hit['_id']}));
-
-    flattenedResults.forEach(user => {
-      const relatedTickets = flattenedTickets.filter(ticket => {
-        return relatedTicketFields.some(field => ticket[field] == user['_id']);
-      });
-      user.relatedTickets = relatedTickets;
-    });
+    return enrichUsersSearch(results);
+  } else {
+    return results;
   }
-
-  return flattenedResults;
 };
+
+const enrichOrganizationsSearch = async(results) => {
+  const organizationIds = results.map(u => u['id']);
+  const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', ['organization_id'], organizationIds);
+
+  const flattenedTickets = tickets.map(hit => hit['_source']);
+
+  results.forEach(organization => {
+    const relatedTickets = flattenedTickets.filter(ticket => {
+      return ticket['organization_id'] == organization['id'];
+    });
+    organization.relatedTickets = relatedTickets;
+  });
+
+  const { hits: { hits: users }} = await searchMultipleTerms('users', ['organization_id'], organizationIds);
+
+  const flattenedUsers = users.map(hit => hit['_source']);
+
+  results.forEach(organization => {
+    const relatedUsers = flattenedUsers.filter(user => {
+      return user['organization_id'] == organization['id'];
+    });
+    organization.relatedUsers = relatedUsers;
+  });
+
+  return results;
+}
+
+const enrichTicketsSearch = async(results) => {
+  const organizationIds = results.map(t => t['organization_id'])
+                                          .filter(t => t != null);
+
+  const { hits: { hits: organizations }} = await searchMultipleTerms('organizations', ['id'], organizationIds);
+
+  const flattenedOrganizations = organizations.map(hit => hit['_source']);
+  results.forEach(ticket => {
+    const relatedOrganization = flattenedOrganizations.filter(organization => {
+      return organization['id'] == ticket['organization_id'];
+    })[0];
+    ticket.organization = relatedOrganization;
+  });
+
+  const submitterIds = results.map(t => t['submitter_id']);
+  const assigneeIds = results.map(t => t['assignee_id'])
+                                      .filter(t => t != null);
+  const userIds = submitterIds.concat(assigneeIds);
+  const { hits: { hits: users }} = await searchMultipleTerms('users', ['id'], userIds);
+
+  const flattenedUsers = users.map(hit => hit['_source']);
+  results.forEach(ticket => {
+    const relatedSubmitterUser = flattenedUsers.filter(user => {
+      return user['id'] == ticket['submitter_id'];
+    })[0];
+    ticket.submitterUser = relatedSubmitterUser;
+
+    const relatedAssigneeUser = flattenedUsers.filter(user => {
+      return user['id'] == ticket['assignee_id'];
+    })[0];
+    ticket.assigneeUser = relatedAssigneeUser;
+  });
+
+  return results;
+};
+
+const enrichUsersSearch = async(results) => {
+  const userIds = results.map(u => u['id']);
+  const relatedTicketFields = ['submitter_id', 'assignee_id'];
+  const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', relatedTicketFields, userIds);
+
+  const flattenedTickets = tickets.map(hit => hit['_source']);
+
+  results.forEach(user => {
+    const relatedTickets = flattenedTickets.filter(ticket => {
+      return relatedTicketFields.some(field => ticket[field] == user['id']);
+    });
+    user.relatedTickets = relatedTickets;
+  });
+
+  return results;
+}
 
 module.exports = {
   populate,
