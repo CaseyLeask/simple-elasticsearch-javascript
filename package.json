@@ -4,7 +4,7 @@
   "description": "A simple elasticsearch javascript project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "node index.js"
   },
   "repository": {
@@ -20,5 +20,9 @@
   "dependencies": {
     "elasticsearch": "^16.0.0",
     "prompts": "^2.1.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4",
+    "chai": "^4.2.0"
   }
 }

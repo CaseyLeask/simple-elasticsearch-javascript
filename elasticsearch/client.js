@@ -66,8 +66,7 @@ function searchOneTerm(index, term, value) {
 
   return client.search({
     index,
-    body: query,
-    pretty: true
+    body: query
   });
 }
 
@@ -83,8 +82,7 @@ function searchMultipleTerms(index, terms, value) {
 
   return client.search({
     index,
-    body: query,
-    pretty: true
+    body: query
   });
 }
 

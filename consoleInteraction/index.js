@@ -1,4 +1,4 @@
-const elasticsearch = require('./elasticsearch');
+const elasticsearch = require('../elasticsearch');
 const { textInput, choiceInput } = require('./prompts');
 
 const begin = () => {
