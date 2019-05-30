@@ -19,10 +19,11 @@
   "homepage": "https://github.com/CaseyLeask/simple-elasticsearch-javascript#readme",
   "dependencies": {
     "elasticsearch": "^16.0.0",
-    "prompts": "^2.1.0"
+    "prompts": "^2.1.0",
+    "sinon": "^7.3.2"
   },
   "devDependencies": {
-    "mocha": "^6.1.4",
-    "chai": "^4.2.0"
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
   }
 }
