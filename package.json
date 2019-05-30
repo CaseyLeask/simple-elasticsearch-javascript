@@ -4,7 +4,7 @@
   "description": "A simple elasticsearch javascript project",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --recursive",
     "start": "node index.js"
   },
   "repository": {

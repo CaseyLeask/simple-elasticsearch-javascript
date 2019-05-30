@@ -6,31 +6,41 @@ const {
   searchOneTerm,
   searchMultipleTerms
 } = require('./client');
-const searchData = require('./searchData');
+const searchData = require('../data');
 
-function loadIndexData(source) {
-  const sourceJSON = searchData.loadFile(source);
+function loadIndexData(index, data) {
+  const type = index;
 
-  const index = source;
-  const type  = index;
-
-  return bulk(index, type, sourceJSON);
+  return bulk(index, type, data);
 }
 
-const populate = async() => {
+const populate = async(sources) => {
   console.log('Testing elasticsearch connection');
   await ping();
   console.log('elasticsearch connection is up');
 
   console.log('Recreating indices');
-  await Promise.all(searchData.sources.map(recreateIndex));
+  const indicesRecreated = [];
 
+  for (const index of sources.keys()) {
+    indicesRecreated.push(recreateIndex(index));
+  }
+
+  await Promise.all(indicesRecreated);
+  console.log('indices have been recreated');
+  console.log('...');
   console.log('loading data into indices');
-  await Promise.all(searchData.sources.map(loadIndexData));
+  const indicesPopulated = [];
+
+  for (const [index, data] of sources) {
+    indicesPopulated.push(loadIndexData(index, data));
+  }
+
+  await Promise.all(indicesPopulated);
   console.log('data has loaded');
 };
 
-const getSearchableFields = async(sources = searchData.sources) => {
+const getSearchableFields = async(sources) => {
   const indicesData = await indices(sources);
 
   const flattenedData = {};
