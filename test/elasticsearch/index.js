@@ -78,6 +78,71 @@ describe('elasticsearch', () => {
         });
       });
     });
+
+    describe('when retrieving searchable fields', () => {
+      it('should return all searchable fields', async() => {
+        const actual = await elasticsearch.getSearchableFields([
+          'organizations',
+          'tickets',
+          'users'
+        ]);
+
+        expect(actual).to.deep.equal(
+          {
+            organizations: [
+              'created_at',
+              'details',
+              'domain_names',
+              'external_id',
+              'id',
+              'name',
+              'shared_tickets',
+              'tags',
+              'url'
+            ],
+            tickets: [
+              'assignee_id',
+              'created_at',
+              'description',
+              'due_at',
+              'external_id',
+              'has_incidents',
+              'id',
+              'organization_id',
+              'priority',
+              'status',
+              'subject',
+              'submitter_id',
+              'tags',
+              'type',
+              'url',
+              'via'
+            ],
+            users: [
+              'active',
+              'alias',
+              'created_at',
+              'email',
+              'external_id',
+              'id',
+              'last_login_at',
+              'locale',
+              'name',
+              'organization_id',
+              'phone',
+              'role',
+              'shared',
+              'signature',
+              'suspended',
+              'tags',
+              'timezone',
+              'url',
+              'verified'
+            ]
+          }
+        );
+      });
+    });
   });
 
   describe('with a related data set', () => {
