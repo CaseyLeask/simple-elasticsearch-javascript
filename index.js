@@ -4,8 +4,7 @@ const consoleInteraction = require('./consoleInteraction');
 
 async function main() {
   try {
-    const sources = data.loadSources();
-    await elasticsearch.populate(sources);
+    await elasticsearch.populate(data.loadSources());
     process.exit();
   } catch ({message, stack}) {
     console.log(message, stack);
