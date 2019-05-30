@@ -1,11 +1,7 @@
 const prompts = require('prompts');
 const elasticsearch = require('../elasticsearch');
 
-const begin = () => {
-  welcome();
-};
-
-const welcome = async() => {
+const begin = async(logger = console) => {
   const sourceAnswers = await prompts([
     {
       type: 'text',
@@ -21,34 +17,20 @@ const welcome = async() => {
   ], { onSubmit });
 
   if (sourceAnswers.quit) {
-    process.exit();
+    logger.log('Quitting...');
+    return;
   }
 
   if (sourceAnswers.searchOptions == '1') {
-    searchZendesk();
+    await searchZendesk(logger);
   }
 
   if (sourceAnswers.searchOptions == '2') {
-    const sources = await elasticsearch.getSearchableFields([
-      'organizations',
-      'tickets',
-      'users'
-    ]);
-
-    Object.keys(sources).forEach(source => {
-      const sourceCapitalized = source.charAt(0).toUpperCase() + source.slice(1);
-
-      console.log('-------------------------------------------------------------------------------');
-      console.log(`Search ${sourceCapitalized} with`);
-      sources[source].forEach(field => console.log(field));
-      console.log('');
-    });
-
-    return;
+    await getSearchableFields(logger);
   }
 };
 
-const searchZendesk = async() => {
+const searchZendesk = async(logger) => {
   const sourceAnswers = await prompts([
     {
       type: 'text',
@@ -59,7 +41,8 @@ const searchZendesk = async() => {
   ], { onSubmit });
 
   if (sourceAnswers.quit) {
-    process.exit();
+    logger.log('Quitting...');
+    return;
   }
 
   let source = {
@@ -89,21 +72,39 @@ const searchZendesk = async() => {
   ], { onSubmit });
 
   if (searchAnswers.quit) {
-    process.exit();
+    logger.log('Quitting...');
+    return;
   }
 
   try {
     const results = await elasticsearch.getSearch(source, searchAnswers.term, searchAnswers.value);
 
     if (results.length > 0) {
-      console.log(JSON.stringify(results, null, 2));
+      logger.log(JSON.stringify(results, null, 2));
     } else {
-      console.log('No results found');
+      logger.log('No results found');
     }
   } catch ({message}) {
-    console.log(`error connecting to elasticsearch: ${message}`);
+    logger.log(`error connecting to elasticsearch: ${message}`);
   }
-}
+};
+
+const getSearchableFields = async(logger) => {
+  const sources = await elasticsearch.getSearchableFields([
+    'organizations',
+    'tickets',
+    'users'
+  ]);
+
+  Object.keys(sources).forEach(source => {
+    const sourceCapitalized = source.charAt(0).toUpperCase() + source.slice(1);
+
+    logger.log('-------------------------------------------------------------------------------');
+    logger.log(`Search ${sourceCapitalized} with`);
+    sources[source].forEach(field => logger.log(field));
+    logger.log('');
+  });
+};
 
 const onSubmit = (_prompt, response, answers) => {
   if (response == 'quit') {
