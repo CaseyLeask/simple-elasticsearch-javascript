@@ -131,6 +131,19 @@ const enrichTicketsSearch = async(results) => {
 };
 
 const enrichUsersSearch = async(results) => {
+  const organizationIds = results.map(t => t['organization_id'])
+                                          .filter(t => t != null);
+
+  const { hits: { hits: organizations }} = await searchMultipleTerms('organizations', ['id'], organizationIds);
+
+  const flattenedOrganizations = organizations.map(hit => hit['_source']);
+  results.forEach(ticket => {
+    const relatedOrganization = flattenedOrganizations.filter(organization => {
+      return organization['id'] == ticket['organization_id'];
+    })[0];
+    ticket.organization = relatedOrganization;
+  });
+
   const userIds = results.map(u => u['id']);
   const relatedTicketFields = ['submitter_id', 'assignee_id'];
   const { hits: { hits: tickets }} = await searchMultipleTerms('tickets', relatedTicketFields, userIds);
