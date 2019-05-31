@@ -1,8 +1,5 @@
 const {
-  ping,
-  indices,
-  bulk,
-  recreateIndex
+  ping
 } = require('./client');
 
 const {

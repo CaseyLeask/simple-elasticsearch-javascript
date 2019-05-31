@@ -70,8 +70,16 @@ function searchOneTerm(index, term, value) {
   });
 }
 
-function searchMultipleTerms(index, terms, value) {
-  const shouldQuery = terms.map(t => ({terms: {[t]: value}}));
+function searchMultipleTerms(index, terms, values) {
+  if (!Array.isArray(terms)) {
+    terms = [terms];
+  }
+
+  if (!Array.isArray(values)) {
+    values = [values];
+  }
+
+  const shouldQuery = terms.map(t => ({terms: {[t]: values}}));
   const query = {
     "query": {
       "bool": {

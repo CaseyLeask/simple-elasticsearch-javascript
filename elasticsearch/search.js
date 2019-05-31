@@ -44,7 +44,7 @@ const enrichOrganizationsSearch = async(source, term, value) => {
   const results = await searchQuery(source, term, value);
 
   const organizationIds = results.map(u => u['id']);
-  const tickets = await searchQuery('tickets', ['organization_id'], organizationIds);
+  const tickets = await searchQuery('tickets', 'organization_id', organizationIds);
 
   results.forEach(organization => {
     const relatedTickets = tickets.filter(ticket => {
@@ -53,7 +53,7 @@ const enrichOrganizationsSearch = async(source, term, value) => {
     organization.relatedTickets = relatedTickets;
   });
 
-  const users = await searchQuery('users', ['organization_id'], organizationIds);
+  const users = await searchQuery('users', 'organization_id', organizationIds);
 
   results.forEach(organization => {
     const relatedUsers = users.filter(user => {
@@ -71,7 +71,7 @@ const enrichTicketsSearch = async(source, term, value) => {
   const organizationIds = results.map(t => t['organization_id'])
                                  .filter(t => t != null);
 
-  const organizations = await searchQuery('organizations', ['id'], organizationIds);
+  const organizations = await searchQuery('organizations', 'id', organizationIds);
 
   results.forEach(ticket => {
     const relatedOrganization = organizations.filter(organization => {
@@ -85,7 +85,7 @@ const enrichTicketsSearch = async(source, term, value) => {
                                       .filter(t => t != null);
   const userIds = submitterIds.concat(assigneeIds);
 
-  const users = await searchQuery('users', ['id'], userIds);
+  const users = await searchQuery('users', 'id', userIds);
 
   results.forEach(ticket => {
     const relatedSubmitterUser = users.filter(user => {
@@ -108,7 +108,7 @@ const enrichUsersSearch = async(source, term, value) => {
   const organizationIds = results.map(t => t['organization_id'])
                                           .filter(t => t != null);
 
-  const organizations = await searchQuery('organizations', ['id'], organizationIds);
+  const organizations = await searchQuery('organizations', 'id', organizationIds);
 
   results.forEach(ticket => {
     const relatedOrganization = organizations.filter(organization => {
