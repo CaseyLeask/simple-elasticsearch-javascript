@@ -48,5 +48,6 @@ Since the fields can be dynamic, but known when beginning console interaction, I
 # Shortcomings
 We're dropping the indexes and re-creating them every time the application starts.
 That's fine for local development, but it's not a thing you should be doing in production.
-This code is real messy, and lacks a proper test suite. This code was done in the style of a 'spike', a polite way of saying 'hack day code, not for long term maintenance'.
 In the process of implementing every feature in the requirements, I realised that the solution is a combination of ORM and Search.
+Currently there's no concept of an ORM in the codebase which leaves the elasticsearch code a bit messy as a result.
+Would be interesting to see how close to requirements Rails Activemodel and Elasticsearch::Model could get, for example https://github.com/elastic/elasticsearch-rails/tree/master/elasticsearch-model#relationships-and-associations
