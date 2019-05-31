@@ -56,13 +56,38 @@ function bulk(index, type, data) {
 }
 
 function searchOneTerm(index, term, value) {
-  const query = {
-    "query": {
-      "match" : {
-        [term] : value
+  let query;
+
+  if (value == '') {
+    query = {
+      "query": {
+        "bool": {
+          "must": [],
+          "filter": [
+            {
+              "match_all": {}
+            }
+          ],
+          "should": [],
+          "must_not": [
+            {
+              "exists": {
+                "field": term
+              }
+            }
+          ]
+        }
+      },
+    };
+  } else {
+    query = {
+      "query": {
+        "match" : {
+          [term] : value
+        }
       }
-    }
-  };
+    };
+  }
 
   return client.search({
     index,

@@ -77,6 +77,21 @@ describe('elasticsearch', () => {
           });
         });
       });
+
+      describe("with a search term of 'organization_id'", () => {
+        const searchTerm = 'organization_id';
+
+        describe("and a search value of ''", () => {
+          const searchValue = '';
+
+          it("should return only the 'Cross Barlow' user", async() => {
+            const actual = await elasticsearch.getSearch(source, searchTerm, searchValue);
+
+            expect(actual).to.have.lengthOf(1);
+            expect(actual[0].name).to.equal('Cross Barlow');
+          });
+        });
+      });
     });
 
     describe('when retrieving searchable fields', () => {

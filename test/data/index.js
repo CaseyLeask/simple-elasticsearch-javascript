@@ -173,7 +173,6 @@ describe('data', () => {
               "email": "jonibarlow@flotonic.com",
               "phone": "9575-552-585",
               "signature": "Don't Worry Be Happy!",
-              "organization_id": 106,
               "tags": [
                 "Foxworth",
                 "Woodlands",
