@@ -10,7 +10,7 @@ brew install elasticsearch
 Follow the instructions for starting elasticsearch specified in homebrew.
 
 ## Node
-v8.15.0 or later is recommended, as we use `await` syntax.
+v8.15.0 (LTS) or later is recommended, as we use `await` syntax.
 I recommend https://github.com/nvm-sh/nvm#installation-and-update if you don't have a preferred, already installed Node version manager.
 
 ## NPM Dependencies
@@ -24,6 +24,11 @@ yarn
 # Usage
 ```
 yarn start
+```
+
+# Tests
+```
+yarn test
 ```
 
 # Troubleshooting
@@ -44,6 +49,8 @@ What this means is that if you want to add or remove fields from any of the data
 I'm exploiting elasticsearch dynamic mappings to do this while still giving fast results to queries.
 The exception to this is the relations between the data-sets, since there isn't a way to programmatically link, for example `ticket.submitter_id` to `users`, without establishing that link somewhere.
 Since the fields can be dynamic, but known when beginning console interaction, I made the 'Enter Search Term' list be an auto-suggest of available fields, updated on the fly based on user input.
+The tabular format presented makes it hard to share, reuse and aggregate results over time, a requirement I've seen very often.
+I made the response valid JSON. I chose JSON over CSV because of the nested nature of the results leads to better display with JSON.
 
 # Shortcomings
 We're dropping the indexes and re-creating them every time the application starts.
@@ -51,3 +58,4 @@ That's fine for local development, but it's not a thing you should be doing in p
 In the process of implementing every feature in the requirements, I realised that the solution is a combination of ORM and Search.
 Currently there's no concept of an ORM in the codebase which leaves the elasticsearch code a bit messy as a result.
 Would be interesting to see how close to requirements Rails Activemodel and Elasticsearch::Model could get, for example https://github.com/elastic/elasticsearch-rails/tree/master/elasticsearch-model#relationships-and-associations
+Related data is returned in full. While I see `ticket_N: subject` as insufficient, I'm not clear on which fields are needed (it's easy enough to remove them as per your needs).
